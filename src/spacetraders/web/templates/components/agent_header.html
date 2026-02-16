@@ -1,0 +1,7 @@
+<div class="agent-bar">
+    <span class="callsign">{{ agent.symbol }}</span>
+    <span><span class="label">Faction:</span> {{ agent.starting_faction }}</span>
+    <span><span class="label">HQ:</span> {{ agent.headquarters }}</span>
+    <span class="credits"><span class="label">Credits:</span> {{ "{:,}".format(agent.credits) }}</span>
+    <span><span class="label">Ships:</span> {{ agent.ship_count }}</span>
+</div>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SpaceTraders{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head_extra %}{% endblock %}
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body>
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" style="text-decoration:none"><strong class="brand">&#x1F680; SpaceTraders</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/" {% if active_nav == "dashboard" %}class="active"{% endif %}>Dashboard</a></li>
+            <li><a href="/fleet" {% if active_nav == "fleet" %}class="active"{% endif %}>Fleet</a></li>
+            <li><a href="/system" {% if active_nav == "system" %}class="active"{% endif %}>System Map</a></li>
+            <li><a href="/intel" {% if active_nav == "intel" %}class="active"{% endif %}>Intel</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div id="agent-header" hx-get="/agent" hx-trigger="agent-updated from:body" hx-swap="innerHTML">
+            {% block agent_header %}{% endblock %}
+        </div>
+
+        <div id="action-toast" class="toast-container"></div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

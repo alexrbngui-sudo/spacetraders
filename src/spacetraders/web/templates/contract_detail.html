@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Contract — SpaceTraders{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>{{ contract.type.value }} Contract</h2>
+    <div>
+        {% if contract.fulfilled %}
+        <span class="badge badge-fulfilled">Fulfilled</span>
+        {% elif contract.accepted %}
+        <span class="badge badge-accepted">Accepted</span>
+        {% else %}
+        <span class="badge badge-pending">Pending</span>
+        {% endif %}
+    </div>
+</div>
+
+<div id="contract-content">
+    <div class="card-grid">
+        <article>
+            <header><h3>Details</h3></header>
+            <table>
+                <tr><td class="text-muted">ID</td><td style="font-size: 0.8rem;">{{ contract.id }}</td></tr>
+                <tr><td class="text-muted">Faction</td><td>{{ contract.faction_symbol }}</td></tr>
+                <tr><td class="text-muted">Type</td><td>{{ contract.type.value }}</td></tr>
+                <tr><td class="text-muted">Deadline</td><td>{{ contract.terms.deadline.strftime('%Y-%m-%d %H:%M UTC') }}</td></tr>
+                <tr><td class="text-muted">Expiration</td><td>{{ contract.expiration.strftime('%Y-%m-%d %H:%M UTC') }}</td></tr>
+            </table>
+        </article>
+
+        <article>
+            <header><h3>Payment</h3></header>
+            <table>
+                <tr><td class="text-muted">On Accept</td><td class="text-gold">{{ "{:,}".format(contract.terms.payment.on_accepted) }}</td></tr>
+                <tr><td class="text-muted">On Fulfill</td><td class="text-gold">{{ "{:,}".format(contract.terms.payment.on_fulfilled) }}</td></tr>
+                <tr><td class="text-muted">Total</td><td class="text-gold" style="font-weight: 600;">{{ "{:,}".format(contract.terms.payment.on_accepted + contract.terms.payment.on_fulfilled) }}</td></tr>
+            </table>
+        </article>
+    </div>
+
+    <!-- Deliveries -->
+    {% if contract.terms.deliver %}
+    <article>
+        <header><h3>Deliveries</h3></header>
+        <table>
+            <thead>
+                <tr>
+                    <th>Good</th>
+                    <th>Destination</th>
+                    <th>Progress</th>
+                    <th class="text-right">Delivered</th>
+                    <th class="text-right">Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in contract.terms.deliver %}
+                <tr>
+                    <td>{{ d.trade_symbol }}</td>
+                    <td><a href="/system/{{ d.destination_symbol.split('-')[:2]|join('-') }}/{{ d.destination_symbol }}">{{ d.destination_symbol }}</a></td>
+                    <td>
+                        <div class="delivery-progress">
+                            <div class="delivery-bar">
+                                {% set pct = (d.units_fulfilled / d.units_required * 100) if d.units_required > 0 else 0 %}
+                                <div class="delivery-fill" style="width: {{ pct }}%"></div>
+                            </div>
+                            <span class="text-muted" style="font-size: 0.75rem;">{{ pct|int }}%</span>
+                        </div>
+                    </td>
+                    <td class="text-right">{{ d.units_fulfilled }}</td>
+                    <td class="text-right">{{ d.units_required }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+    {% endif %}
+
+    <!-- Actions -->
+    <article>
+        <header><h3>Actions</h3></header>
+
+        {% if not contract.accepted %}
+        <button class="btn-sm"
+                hx-post="/contracts/{{ contract.id }}/accept"
+                hx-target="#contract-content"
+                hx-swap="innerHTML">
+            Accept Contract <span class="htmx-indicator spinner"></span>
+        </button>
+        {% elif not contract.fulfilled %}
+            {% if contract.terms.deliver %}
+            <form hx-post="/contracts/{{ contract.id }}/deliver" hx-target="#contract-content" hx-swap="innerHTML"
+                  style="display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap;">
+                <label style="font-size: 0.8rem;">
+                    Ship
+                    <select name="ship_symbol" style="width: auto;">
+                        {% for ship in ships %}
+                        <option value="{{ ship.symbol }}">{{ ship.symbol }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label style="font-size: 0.8rem;">
+                    Good
+                    <select name="trade_symbol" style="width: auto;">
+                        {% for d in contract.terms.deliver %}
+                        <option value="{{ d.trade_symbol }}">{{ d.trade_symbol }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label style="font-size: 0.8rem;">
+                    Units
+                    <input type="number" name="units" value="1" min="1" style="width: 5rem;">
+                </label>
+                <button type="submit" class="btn-sm">
+                    Deliver <span class="htmx-indicator spinner"></span>
+                </button>
+            </form>
+            {% endif %}
+
+            {% set all_complete = true %}
+            {% for d in contract.terms.deliver %}
+                {% if d.units_fulfilled < d.units_required %}
+                    {% set all_complete = false %}
+                {% endif %}
+            {% endfor %}
+
+            {% if contract.terms.deliver|length == 0 or all_complete %}
+            <button class="btn-sm mt-1"
+                    hx-post="/contracts/{{ contract.id }}/fulfill"
+                    hx-target="#contract-content"
+                    hx-swap="innerHTML">
+                Fulfill Contract <span class="htmx-indicator spinner"></span>
+            </button>
+            {% endif %}
+        {% else %}
+        <p class="text-green">This contract has been fulfilled.</p>
+        {% endif %}
+    </article>
+</div>
+{% endblock %}

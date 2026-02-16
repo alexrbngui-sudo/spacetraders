@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}{{ system_symbol }} — SpaceTraders{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/system-map.css">
+{% endblock %}
+
+{% block content %}
+<h2>System: {{ system_symbol }}</h2>
+<p class="text-muted">{{ waypoints|length }} waypoints</p>
+
+{# ============================================================
+   SVG SYSTEM MAP
+   ============================================================ #}
+<div class="system-map" id="system-map">
+    <div class="system-map-header">
+        <h3>System Map <span class="map-updated">Updated {{ last_updated.strftime('%H:%M:%S UTC') }}</span></h3>
+        <div class="map-controls">
+            <div class="map-zoom-controls">
+                <button type="button" class="map-btn" id="map-zoom-in" title="Zoom in">+</button>
+                <button type="button" class="map-btn" id="map-zoom-out" title="Zoom out">&minus;</button>
+                <button type="button" class="map-btn" id="map-zoom-reset" title="Reset view">&#8634;</button>
+            </div>
+            <select class="theme-select" id="map-theme-select">
+                <option value="">Deep Space</option>
+                <option value="theme-blueprint">Blueprint</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="map-body">
+    <svg id="map-svg" viewBox="{{ layout.view_box }}" data-initial-viewbox="{{ layout.view_box }}"
+         xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+
+        {# --- Orbital connection lines --- #}
+        <g class="map-orbital-lines">
+            {% for line in layout.orbital_lines %}
+            <line class="orbital-line"
+                  x1="{{ line.x1 }}" y1="{{ line.y1 }}"
+                  x2="{{ line.x2 }}" y2="{{ line.y2 }}" />
+            {% endfor %}
+        </g>
+
+        {# --- Transit lines (ships in transit) --- #}
+        <g class="map-transit-lines">
+            {% for tl in layout.transit_lines %}
+            <line class="transit-line"
+                  x1="{{ tl.x1 }}" y1="{{ tl.y1 }}"
+                  x2="{{ tl.x2 }}" y2="{{ tl.y2 }}">
+                <title>{{ tl.ship_symbol }} in transit</title>
+            </line>
+            {% endfor %}
+        </g>
+
+        {# --- Waypoints --- #}
+        <g class="map-waypoints">
+            {% for wp in layout.waypoints %}
+            {% set su = layout.scale_unit %}
+
+            {# Determine CSS class based on type #}
+            {% if wp.wp_type.value == 'PLANET' %}
+                {% set type_class = 'wp-type-planet' %}
+            {% elif wp.wp_type.value == 'GAS_GIANT' %}
+                {% set type_class = 'wp-type-gas-giant' %}
+            {% elif wp.wp_type.value == 'MOON' %}
+                {% set type_class = 'wp-type-moon' %}
+            {% elif wp.wp_type.value in ('ASTEROID_FIELD', 'ASTEROID', 'ENGINEERED_ASTEROID', 'ASTEROID_BASE') %}
+                {% set type_class = 'wp-type-asteroid' %}
+            {% elif wp.wp_type.value in ('ORBITAL_STATION', 'FUEL_STATION') %}
+                {% if wp.wp_type.value == 'FUEL_STATION' %}
+                    {% set type_class = 'wp-type-fuel-station' %}
+                {% else %}
+                    {% set type_class = 'wp-type-station' %}
+                {% endif %}
+            {% elif wp.wp_type.value == 'JUMP_GATE' %}
+                {% set type_class = 'wp-type-jump-gate' %}
+            {% elif wp.wp_type.value == 'NEBULA' %}
+                {% set type_class = 'wp-type-nebula' %}
+            {% elif wp.wp_type.value in ('GRAVITY_WELL', 'ARTIFICIAL_GRAVITY_WELL') %}
+                {% set type_class = 'wp-type-gravity' %}
+            {% elif wp.wp_type.value == 'DEBRIS_FIELD' %}
+                {% set type_class = 'wp-type-debris' %}
+            {% else %}
+                {% set type_class = 'wp-type-default' %}
+            {% endif %}
+
+            <a href="/system/{{ system_symbol }}/{{ wp.symbol }}"
+               class="wp-group {{ type_class }}{% if wp.has_ship %} wp-has-ship{% endif %}{% if wp.is_destination %} wp-is-destination{% endif %}{% if wp.is_hq %} wp-is-hq{% endif %}{% if wp.is_delivery %} wp-is-delivery{% endif %}"
+               data-cx="{{ wp.x }}" data-cy="{{ wp.y }}"
+               data-kind="waypoint"
+               data-symbol="{{ wp.symbol }}"
+               data-wp-type="{{ wp.wp_type.value|replace('_', ' ')|title }}"
+               data-coords="{{ wp.x|round(1) }}, {{ wp.y|round(1) }}"
+               data-traits="{{ wp.trait_names|join(', ') }}"
+               data-market="{{ wp.has_market|lower }}"
+               data-shipyard="{{ wp.has_shipyard|lower }}"
+               data-ships-here="{{ wp.ships_here|join(', ') }}"
+               data-inbound="{{ wp.inbound_ships|join(', ') }}"
+               data-orbits="{{ wp.orbits or '' }}"
+               data-is-hq="{{ wp.is_hq|lower }}"
+               data-is-delivery="{{ wp.is_delivery|lower }}"
+               data-deliveries="{% for d in wp.deliveries %}{{ d.trade_symbol }} {{ d.units_fulfilled }}/{{ d.units_required }}{% if not loop.last %}; {% endif %}{% endfor %}">
+                <title>{{ wp.symbol }} — {{ wp.wp_type.value|replace('_', ' ')|title }}{% if wp.is_hq %} [HQ]{% endif %}{% if wp.is_delivery %} [DELIVERY]{% endif %}{% if wp.trait_names %} | {{ wp.trait_names|join(', ') }}{% endif %}</title>
+
+                {# --- Highlight rings --- #}
+                {% if wp.is_hq %}
+                <circle class="wp-hq-ring" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 7 }}" />
+                <circle class="wp-hq-ring-inner" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 6 }}" />
+                {% endif %}
+                {% if wp.is_delivery %}
+                <circle class="wp-delivery-ring" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 6.5 }}" />
+                {% endif %}
+                {% if wp.has_ship %}
+                <circle class="wp-ship-ring" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 5.5 }}" />
+                {% endif %}
+                {% if wp.is_destination %}
+                <circle class="wp-dest-ring" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 5.5 }}" />
+                {% endif %}
+
+                {# --- Shape per type --- #}
+                {% if wp.wp_type.value in ('PLANET', 'GAS_GIANT') %}
+                    {# Circle — planets #}
+                    {% if wp.wp_type.value == 'GAS_GIANT' %}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 4 }}" />
+                    {% else %}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 3 }}" />
+                    {% endif %}
+
+                {% elif wp.wp_type.value == 'MOON' %}
+                    {# Small circle — moons #}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 1.5 }}" />
+
+                {% elif wp.wp_type.value in ('ASTEROID_FIELD', 'ASTEROID', 'ENGINEERED_ASTEROID', 'ASTEROID_BASE') %}
+                    {# Diamond (rotated square) — asteroids #}
+                    {% set s = su * 1.8 %}
+                    <polygon class="wp-shape"
+                             points="{{ wp.x }},{{ wp.y - s }} {{ wp.x + s }},{{ wp.y }} {{ wp.x }},{{ wp.y + s }} {{ wp.x - s }},{{ wp.y }}" />
+
+                {% elif wp.wp_type.value in ('ORBITAL_STATION', 'FUEL_STATION') %}
+                    {# Square — stations #}
+                    {% set s = su * 2 %}
+                    <rect class="wp-shape" x="{{ wp.x - s }}" y="{{ wp.y - s }}" width="{{ s * 2 }}" height="{{ s * 2 }}" />
+
+                {% elif wp.wp_type.value == 'JUMP_GATE' %}
+                    {# Hexagon — jump gates #}
+                    {% set r = su * 2.5 %}
+                    <polygon class="wp-shape"
+                             points="{{ wp.x + r }},{{ wp.y }} {{ wp.x + r * 0.5 }},{{ wp.y - r * 0.866 }} {{ wp.x - r * 0.5 }},{{ wp.y - r * 0.866 }} {{ wp.x - r }},{{ wp.y }} {{ wp.x - r * 0.5 }},{{ wp.y + r * 0.866 }} {{ wp.x + r * 0.5 }},{{ wp.y + r * 0.866 }}" />
+
+                {% elif wp.wp_type.value == 'NEBULA' %}
+                    {# Dashed circle — nebula #}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 3 }}" />
+
+                {% elif wp.wp_type.value in ('GRAVITY_WELL', 'ARTIFICIAL_GRAVITY_WELL') %}
+                    {# Concentric circles — gravity well #}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 3 }}" />
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 2 }}" style="fill:none" />
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 1 }}" style="fill:none" />
+
+                {% elif wp.wp_type.value == 'DEBRIS_FIELD' %}
+                    {# Dashed circle — debris #}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 2 }}" />
+
+                {% else %}
+                    {# Default circle #}
+                    <circle class="wp-shape" cx="{{ wp.x }}" cy="{{ wp.y }}" r="{{ su * 2 }}" />
+                {% endif %}
+
+                {# --- Trait indicator dots --- #}
+                {% if wp.has_market %}
+                <circle class="trait-dot-market" cx="{{ wp.x - su * 1.2 }}" cy="{{ wp.y + su * 4.5 }}" r="{{ su * 0.6 }}" />
+                {% endif %}
+                {% if wp.has_shipyard %}
+                <circle class="trait-dot-shipyard" cx="{{ wp.x + su * 1.2 }}" cy="{{ wp.y + su * 4.5 }}" r="{{ su * 0.6 }}" />
+                {% endif %}
+
+                {# --- Label --- #}
+                <text class="wp-label" x="{{ wp.x }}" y="{{ wp.y + su * 6 }}"
+                      font-size="{{ su * 2 }}">{{ wp.short_label }}</text>
+            </a>
+            {% endfor %}
+        </g>
+
+        {# --- Ships --- #}
+        <g class="map-ships">
+            {% for ship in layout.ships %}
+            {% set su = layout.scale_unit %}
+            {% set s = su * 1.5 %}
+            <g class="ship-group{% if ship.status.value == 'IN_TRANSIT' %} ship-transit{% endif %}"
+               data-cx="{{ ship.x }}" data-cy="{{ ship.y }}"
+               data-kind="ship"
+               data-symbol="{{ ship.symbol }}"
+               data-status="{{ ship.status.value|replace('_', ' ')|title }}"
+               data-role="{{ ship.role|replace('_', ' ')|title }}"
+               data-waypoint="{{ ship.waypoint_symbol }}"
+               data-destination="{{ ship.destination_symbol or '' }}">
+                <title>{{ ship.symbol }} ({{ ship.status.value|replace('_', ' ')|title }})</title>
+                {# Triangle pointing up #}
+                <polygon class="ship-shape"
+                         points="{{ ship.x }},{{ ship.y - s }} {{ ship.x + s * 0.8 }},{{ ship.y + s * 0.6 }} {{ ship.x - s * 0.8 }},{{ ship.y + s * 0.6 }}" />
+                <text class="ship-label" x="{{ ship.x }}" y="{{ ship.y + s + su * 2.5 }}"
+                      font-size="{{ su * 1.6 }}">{{ ship.short_label }}</text>
+            </g>
+            {% endfor %}
+        </g>
+
+    </svg>
+
+    {# --- Detail sidebar --- #}
+    <aside class="map-sidebar" id="map-sidebar">
+        <div class="map-sidebar-empty" id="map-sidebar-empty">
+            <span class="text-muted">Hover over a waypoint or ship to see details</span>
+        </div>
+        <div class="map-sidebar-content" id="map-sidebar-content" style="display:none">
+            <h4 id="sidebar-title"></h4>
+            <dl class="sidebar-details" id="sidebar-details"></dl>
+            <div id="sidebar-relationship"></div>
+        </div>
+    </aside>
+    </div>{# /.map-body #}
+
+    {# --- Legend --- #}
+    <div class="map-legend">
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-planet-stroke);"></span> Planet
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-gas-giant-stroke);"></span> Gas Giant
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-moon-stroke);"></span> Moon
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-asteroid-stroke); border-radius: 0; transform: rotate(45deg);"></span> Asteroid
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-station-stroke); border-radius: 2px;"></span> Station
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-jump-gate-stroke);"></span> Jump Gate
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-ship-stroke);"></span> Ship
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-market-dot);"></span> Market
+        </span>
+        <span class="map-legend-item">
+            <span class="map-legend-swatch" style="background: var(--map-shipyard-dot);"></span> Shipyard
+        </span>
+    </div>
+</div>
+
+{# ============================================================
+   WAYPOINT TABLE (preserved from original)
+   ============================================================ #}
+<table>
+    <thead>
+        <tr>
+            <th>Waypoint</th>
+            <th>Type</th>
+            <th>X</th>
+            <th>Y</th>
+            <th>Traits</th>
+            <th>Orbitals</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wp in waypoints %}
+        <tr>
+            <td>
+                <a href="/system/{{ system_symbol }}/{{ wp.symbol }}"
+                   class="{% if wp.type.value == 'PLANET' %}wp-planet{% elif 'ASTEROID' in wp.type.value %}wp-asteroid{% elif wp.type.value == 'ORBITAL_STATION' or wp.type.value == 'FUEL_STATION' %}wp-station{% elif wp.type.value == 'JUMP_GATE' %}wp-jump-gate{% elif wp.type.value == 'GAS_GIANT' %}wp-gas-giant{% elif wp.type.value == 'MOON' %}wp-moon{% else %}wp-other{% endif %}">
+                    {{ wp.symbol }}
+                </a>
+            </td>
+            <td>{{ wp.type.value|replace('_', ' ')|title }}</td>
+            <td class="text-right">{{ wp.x }}</td>
+            <td class="text-right">{{ wp.y }}</td>
+            <td>
+                {% for trait in wp.traits[:3] %}
+                <span class="text-muted" style="font-size: 0.75rem;">{{ trait.name }}{% if not loop.last %}, {% endif %}</span>
+                {% endfor %}
+                {% if wp.traits|length > 3 %}
+                <span class="text-muted" style="font-size: 0.75rem;">+{{ wp.traits|length - 3 }}</span>
+                {% endif %}
+            </td>
+            <td class="text-muted">{{ wp.orbitals|length if wp.orbitals else 0 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

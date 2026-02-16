@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "spacetraders"
@@ -13,6 +13,11 @@ dependencies = [
     "pydantic-settings>=2.0",
     "python-dotenv>=1.0",
     "rich>=13.0",
+    "textual>=0.80",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
 ]
 
 [project.optional-dependencies]

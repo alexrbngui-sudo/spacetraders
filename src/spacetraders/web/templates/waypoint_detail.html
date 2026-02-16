@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ waypoint.symbol }} — SpaceTraders{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>{{ waypoint.symbol }}</h2>
+    <a href="/system/{{ system_symbol }}" class="text-muted">&larr; Back to system</a>
+</div>
+
+<div class="card-grid">
+    <article>
+        <header><h3>Info</h3></header>
+        <table>
+            <tr><td class="text-muted">Type</td><td>{{ waypoint.type.value|replace('_', ' ')|title }}</td></tr>
+            <tr><td class="text-muted">System</td><td><a href="/system/{{ system_symbol }}">{{ system_symbol }}</a></td></tr>
+            <tr><td class="text-muted">Coordinates</td><td>({{ waypoint.x }}, {{ waypoint.y }})</td></tr>
+            {% if waypoint.faction %}
+            <tr><td class="text-muted">Faction</td><td>{{ waypoint.faction.symbol }}</td></tr>
+            {% endif %}
+            {% if waypoint.is_under_construction %}
+            <tr><td class="text-muted">Status</td><td class="text-orange">Under Construction</td></tr>
+            {% endif %}
+        </table>
+    </article>
+
+    <article>
+        <header><h3>Traits</h3></header>
+        {% if waypoint.traits %}
+        <table>
+            {% for trait in waypoint.traits %}
+            <tr>
+                <td>{{ trait.name }}</td>
+                <td class="text-muted" style="font-size: 0.8rem;">{{ trait.description }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p class="text-muted">No known traits.</p>
+        {% endif %}
+    </article>
+</div>
+
+{% if waypoint.orbitals %}
+<article>
+    <header><h3>Orbitals</h3></header>
+    <div class="actions">
+        {% for orb in waypoint.orbitals %}
+        <a href="/system/{{ system_symbol }}/{{ orb.symbol }}" role="button" class="outline btn-sm">{{ orb.symbol }}</a>
+        {% endfor %}
+    </div>
+</article>
+{% endif %}
+
+<div class="actions mt-2">
+    {% if has_market %}
+    <a href="/market/{{ system_symbol }}/{{ waypoint.symbol }}" role="button" class="btn-sm">View Market</a>
+    {% endif %}
+    {% if has_shipyard %}
+    <a href="#" role="button" class="outline btn-sm" disabled>Shipyard (coming soon)</a>
+    {% endif %}
+</div>
+{% endblock %}

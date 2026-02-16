@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Market: {{ waypoint_symbol }} — SpaceTraders{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>Market: {{ waypoint_symbol }}</h2>
+    <a href="/system/{{ system_symbol }}/{{ waypoint_symbol }}" class="text-muted">&larr; Back to waypoint</a>
+</div>
+
+{% if market.exports or market.imports or market.exchange %}
+<div class="card-grid">
+    {% if market.exports %}
+    <article>
+        <header><h3>Exports</h3></header>
+        <ul style="font-size: 0.85rem;">
+            {% for good in market.exports %}
+            <li>{{ good.name }} <span class="text-muted">({{ good.symbol }})</span></li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    {% if market.imports %}
+    <article>
+        <header><h3>Imports</h3></header>
+        <ul style="font-size: 0.85rem;">
+            {% for good in market.imports %}
+            <li>{{ good.name }} <span class="text-muted">({{ good.symbol }})</span></li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    {% if market.exchange %}
+    <article>
+        <header><h3>Exchange</h3></header>
+        <ul style="font-size: 0.85rem;">
+            {% for good in market.exchange %}
+            <li>{{ good.name }} <span class="text-muted">({{ good.symbol }})</span></li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if market.trade_goods %}
+<article>
+    <header><h3>Trade Goods</h3></header>
+    <table class="market-table">
+        <thead>
+            <tr>
+                <th>Good</th>
+                <th>Type</th>
+                <th>Supply</th>
+                <th class="text-right">Buy</th>
+                <th class="text-right">Sell</th>
+                <th class="text-right">Volume</th>
+                {% if local_ships %}
+                <th>Trade</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for good in market.trade_goods %}
+            <tr>
+                <td>{{ good.symbol }}</td>
+                <td class="text-muted">{{ good.type }}</td>
+                <td>
+                    <span class="supply-{{ good.supply|lower }}">{{ good.supply }}</span>
+                </td>
+                <td class="text-right buy-col">{{ "{:,}".format(good.purchase_price) }}</td>
+                <td class="text-right sell-col">{{ "{:,}".format(good.sell_price) }}</td>
+                <td class="text-right text-muted">{{ good.trade_volume }}</td>
+                {% if local_ships %}
+                <td>
+                    <form style="display: inline-flex; gap: 0.25rem; align-items: center;"
+                          hx-post="/market/{{ system_symbol }}/{{ waypoint_symbol }}/buy"
+                          hx-swap="none">
+                        <select name="ship_symbol" style="width: auto; margin: 0; padding: 0.2rem; font-size: 0.75rem;">
+                            {% for ship in local_ships %}
+                            <option value="{{ ship.symbol }}">{{ ship.symbol }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="trade_symbol" value="{{ good.symbol }}">
+                        <input type="number" name="units" value="1" min="1" style="width: 4rem; margin: 0; padding: 0.2rem; font-size: 0.75rem;">
+                        <button type="submit" class="btn-sm outline" style="margin: 0; padding: 0.2rem 0.4rem; font-size: 0.7rem;">Buy</button>
+                    </form>
+                    <form style="display: inline-flex; gap: 0.25rem; align-items: center;"
+                          hx-post="/market/{{ system_symbol }}/{{ waypoint_symbol }}/sell"
+                          hx-swap="none">
+                        <select name="ship_symbol" style="width: auto; margin: 0; padding: 0.2rem; font-size: 0.75rem;">
+                            {% for ship in local_ships %}
+                            <option value="{{ ship.symbol }}">{{ ship.symbol }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="trade_symbol" value="{{ good.symbol }}">
+                        <input type="number" name="units" value="1" min="1" style="width: 4rem; margin: 0; padding: 0.2rem; font-size: 0.75rem;">
+                        <button type="submit" class="btn-sm outline secondary" style="margin: 0; padding: 0.2rem 0.4rem; font-size: 0.7rem;">Sell</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+{% else %}
+<article>
+    <p class="text-muted">No detailed trade data available. A ship must be docked here to see prices.</p>
+</article>
+{% endif %}
+{% endblock %}

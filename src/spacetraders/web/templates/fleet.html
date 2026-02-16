@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Fleet — SpaceTraders{% endblock %}
+
+{% block content %}
+<h2>Fleet</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Ship</th>
+            <th>Role</th>
+            <th>Frame</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Fuel</th>
+            <th>Cargo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ship in ships %}
+        <tr>
+            <td><a href="/fleet/{{ ship.symbol }}">{{ ship.symbol }}</a></td>
+            <td class="text-muted">{{ ship.registration.role }}</td>
+            <td>{{ ship.frame.name }}</td>
+            <td><a href="/system/{{ ship.nav.system_symbol }}">{{ ship.nav.waypoint_symbol }}</a></td>
+            <td><span class="badge badge-{{ ship.nav.status.value|lower|replace('_', '-') }}">{{ ship.nav.status.value|replace('_', ' ') }}</span></td>
+            <td>
+                <div class="gauge">
+                    <div class="gauge-bar" style="width: 60px;">
+                        {% set fuel_pct = (ship.fuel.current / ship.fuel.capacity * 100) if ship.fuel.capacity > 0 else 100 %}
+                        <div class="gauge-fill fuel" style="width: {{ fuel_pct }}%"></div>
+                    </div>
+                    <span class="text-muted" style="font-size: 0.75rem;">{{ ship.fuel.current }}/{{ ship.fuel.capacity }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="gauge">
+                    <div class="gauge-bar" style="width: 60px;">
+                        {% set cargo_pct = (ship.cargo.units / ship.cargo.capacity * 100) if ship.cargo.capacity > 0 else 0 %}
+                        <div class="gauge-fill cargo" style="width: {{ cargo_pct }}%"></div>
+                    </div>
+                    <span class="text-muted" style="font-size: 0.75rem;">{{ ship.cargo.units }}/{{ ship.cargo.capacity }}</span>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

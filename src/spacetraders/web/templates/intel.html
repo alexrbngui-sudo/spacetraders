@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Intel — SpaceTraders{% endblock %}
+
+{% block content %}
+<h2>Asteroid Intel</h2>
+
+<nav aria-label="Resource filter" style="margin-bottom: 1rem;">
+    <a href="/intel" role="button" {% if not selected_resource %}class="contrast"{% else %}class="outline"{% endif %} style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">All</a>
+    {% for res in resources %}
+    <a href="/intel/resource/{{ res }}" role="button" {% if selected_resource == res %}class="contrast"{% else %}class="outline"{% endif %} style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">{{ res }}</a>
+    {% endfor %}
+</nav>
+
+{% if records %}
+<figure>
+<table>
+    <thead>
+        <tr>
+            <th>Asteroid</th>
+            <th>Resource</th>
+            <th>Extractions</th>
+            <th>Hits</th>
+            <th>Hit Rate</th>
+            <th>Status</th>
+            <th>Last Updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in records %}
+        <tr{% if r.blacklisted %} style="opacity: 0.5"{% endif %}>
+            <td>{{ r.asteroid_symbol }}</td>
+            <td>{{ r.resource_symbol }}</td>
+            <td>{{ r.total_extractions }}</td>
+            <td>{{ r.target_hits }}</td>
+            <td>
+                {% if r.total_extractions > 0 %}
+                    {% set rate = (r.target_hits / r.total_extractions * 100)|round(1) %}
+                    <span style="color: {% if rate >= 20 %}var(--pico-color-green-500){% elif rate >= 10 %}var(--pico-color-yellow-500){% else %}var(--pico-color-red-500){% endif %}">
+                        {{ rate }}%
+                    </span>
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if r.blacklisted %}
+                    <span style="color: var(--pico-color-red-500)" title="{{ r.blacklist_reason }}">Blacklisted</span>
+                {% else %}
+                    <span style="color: var(--pico-color-green-500)">Active</span>
+                {% endif %}
+            </td>
+            <td class="text-muted" style="font-size: 0.8rem;">{{ r.last_updated[:19] if r.last_updated else '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+{% else %}
+<p class="text-muted">No mining data yet. Run a mission to start collecting intel.</p>
+{% endif %}
+{% endblock %}

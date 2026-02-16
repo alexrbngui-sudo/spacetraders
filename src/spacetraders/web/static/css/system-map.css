@@ -1,0 +1,601 @@
+/* System Map SVG — themeable via CSS custom properties */
+
+/* =============================================
+   DEEP SPACE (default)
+   Dark navy with cyan/blue accents and soft glows
+   ============================================= */
+
+.system-map {
+    --map-bg: #0a0e17;
+    --map-bg-grid: rgba(30, 41, 59, 0.3);
+
+    /* Waypoint shapes */
+    --map-planet-fill: #1e3a5f;
+    --map-planet-stroke: #60a5fa;
+    --map-gas-giant-fill: #2d1f0e;
+    --map-gas-giant-stroke: #f97316;
+    --map-moon-fill: #1e293b;
+    --map-moon-stroke: #94a3b8;
+    --map-asteroid-fill: #2e1065;
+    --map-asteroid-stroke: #a78bfa;
+    --map-station-fill: #0e3a3a;
+    --map-station-stroke: #22d3ee;
+    --map-jump-gate-fill: #052e16;
+    --map-jump-gate-stroke: #10b981;
+    --map-nebula-fill: rgba(167, 139, 250, 0.1);
+    --map-nebula-stroke: #a78bfa;
+    --map-gravity-fill: none;
+    --map-gravity-stroke: #ef4444;
+    --map-debris-fill: #1a1a2e;
+    --map-debris-stroke: #64748b;
+    --map-fuel-station-fill: #2d1f0e;
+    --map-fuel-station-stroke: #f59e0b;
+    --map-default-fill: #1e293b;
+    --map-default-stroke: #475569;
+
+    /* Glow effects */
+    --map-glow-planet: 0 0 6px rgba(96, 165, 250, 0.5);
+    --map-glow-gas-giant: 0 0 8px rgba(249, 115, 22, 0.4);
+    --map-glow-station: 0 0 6px rgba(34, 211, 238, 0.4);
+    --map-glow-jump-gate: 0 0 8px rgba(16, 185, 129, 0.5);
+    --map-glow-none: none;
+
+    /* Labels & lines */
+    --map-label-color: #94a3b8;
+    --map-label-font-size: 0.8;
+    --map-orbital-line: rgba(148, 163, 184, 0.2);
+    --map-transit-line: rgba(245, 158, 11, 0.5);
+    --map-grid-line: rgba(30, 41, 59, 0.4);
+    --map-grid-label: rgba(100, 116, 139, 0.5);
+
+    /* Ships */
+    --map-ship-fill: #f59e0b;
+    --map-ship-stroke: #fbbf24;
+    --map-ship-transit-fill: rgba(245, 158, 11, 0.6);
+
+    /* Trait indicators */
+    --map-market-dot: #f59e0b;
+    --map-shipyard-dot: #22d3ee;
+
+    /* My stuff highlights */
+    --map-ship-ring: rgba(245, 158, 11, 0.35);
+    --map-ship-ring-stroke: rgba(245, 158, 11, 0.7);
+    --map-dest-ring: rgba(34, 211, 238, 0.2);
+    --map-dest-ring-stroke: rgba(34, 211, 238, 0.6);
+    --map-dest-dash: 4 3;
+    --map-hq-ring: rgba(16, 185, 129, 0.15);
+    --map-hq-ring-stroke: #10b981;
+    --map-hq-inner-stroke: rgba(16, 185, 129, 0.4);
+    --map-delivery-ring: rgba(168, 85, 247, 0.15);
+    --map-delivery-ring-stroke: #a855f7;
+
+    /* Hover */
+    --map-hover-brightness: 1.3;
+    --map-hover-scale: 1.15;
+
+    /* Container */
+    background: var(--map-bg);
+    border: 1px solid var(--space-border, #1e293b);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* =============================================
+   BLUEPRINT
+   White outlines on dark blue, no fills, schematic
+   ============================================= */
+
+.system-map.theme-blueprint {
+    --map-bg: #0a1628;
+    --map-bg-grid: rgba(100, 149, 237, 0.08);
+
+    --map-planet-fill: transparent;
+    --map-planet-stroke: #6495ed;
+    --map-gas-giant-fill: transparent;
+    --map-gas-giant-stroke: #cd853f;
+    --map-moon-fill: transparent;
+    --map-moon-stroke: #8899aa;
+    --map-asteroid-fill: transparent;
+    --map-asteroid-stroke: #9988cc;
+    --map-station-fill: transparent;
+    --map-station-stroke: #55ccdd;
+    --map-jump-gate-fill: transparent;
+    --map-jump-gate-stroke: #55bb77;
+    --map-nebula-fill: transparent;
+    --map-nebula-stroke: #9988cc;
+    --map-gravity-fill: transparent;
+    --map-gravity-stroke: #cc5555;
+    --map-debris-fill: transparent;
+    --map-debris-stroke: #778899;
+    --map-fuel-station-fill: transparent;
+    --map-fuel-station-stroke: #ccaa44;
+    --map-default-fill: transparent;
+    --map-default-stroke: #6688aa;
+
+    --map-glow-planet: none;
+    --map-glow-gas-giant: none;
+    --map-glow-station: none;
+    --map-glow-jump-gate: none;
+    --map-glow-none: none;
+
+    --map-label-color: #8899bb;
+    --map-orbital-line: rgba(100, 149, 237, 0.15);
+    --map-transit-line: rgba(204, 170, 68, 0.5);
+    --map-grid-line: rgba(100, 149, 237, 0.12);
+    --map-grid-label: rgba(100, 149, 237, 0.4);
+
+    --map-ship-fill: transparent;
+    --map-ship-stroke: #ccaa44;
+    --map-ship-transit-fill: transparent;
+
+    --map-market-dot: #ccaa44;
+    --map-shipyard-dot: #55ccdd;
+
+    --map-ship-ring: rgba(204, 170, 68, 0.2);
+    --map-ship-ring-stroke: rgba(204, 170, 68, 0.6);
+    --map-dest-ring: rgba(85, 204, 221, 0.15);
+    --map-dest-ring-stroke: rgba(85, 204, 221, 0.5);
+    --map-dest-dash: 3 2;
+    --map-hq-ring: rgba(85, 187, 119, 0.06);
+    --map-hq-ring-stroke: rgba(85, 187, 119, 0.6);
+    --map-hq-inner-stroke: rgba(85, 187, 119, 0.3);
+    --map-delivery-ring: rgba(153, 102, 204, 0.06);
+    --map-delivery-ring-stroke: rgba(153, 102, 204, 0.6);
+
+    --map-hover-brightness: 1.5;
+    --map-hover-scale: 1.1;
+
+    border-color: rgba(100, 149, 237, 0.2);
+}
+
+
+/* =============================================
+   STRUCTURAL STYLES (theme-independent)
+   ============================================= */
+
+.system-map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.system-map-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--cyan, #22d3ee);
+}
+
+.map-updated {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-left: 0.5rem;
+}
+
+.map-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.map-zoom-controls {
+    display: flex;
+    gap: 0.2rem;
+}
+
+.map-btn {
+    background: var(--space-surface, #111827);
+    border: 1px solid var(--space-border, #1e293b);
+    color: #94a3b8;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.map-btn:hover {
+    color: var(--cyan, #22d3ee);
+    border-color: var(--cyan, #22d3ee);
+}
+
+.theme-select {
+    background: var(--space-surface, #111827);
+    border: 1px solid var(--space-border, #1e293b);
+    color: #94a3b8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.map-body {
+    display: flex;
+    gap: 0;
+    min-height: 350px;
+    max-height: 500px;
+}
+
+.system-map svg {
+    flex: 1;
+    min-width: 0;
+    height: auto;
+    max-height: 500px;
+    display: block;
+    cursor: grab;
+}
+
+.system-map svg.panning {
+    cursor: grabbing;
+}
+
+/* Detail sidebar */
+.map-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--space-border, #1e293b);
+    padding: 0.75rem;
+    overflow-y: auto;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-sidebar-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+}
+
+.map-sidebar h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--cyan, #22d3ee);
+    word-break: break-all;
+}
+
+.sidebar-details {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.2rem 0.5rem;
+}
+
+.sidebar-details dt {
+    color: #64748b;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.sidebar-details dd {
+    margin: 0;
+    color: #c9d1d9;
+    font-size: 0.78rem;
+}
+
+#sidebar-relationship {
+    margin-top: 0.6rem;
+}
+
+.sidebar-rel-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.sidebar-rel-ship {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.sidebar-rel-dest {
+    background: rgba(34, 211, 238, 0.1);
+    color: #22d3ee;
+    border: 1px solid rgba(34, 211, 238, 0.25);
+}
+
+.sidebar-rel-mine {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.sidebar-rel-hq {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    font-weight: 700;
+}
+
+.sidebar-rel-delivery {
+    background: rgba(168, 85, 247, 0.12);
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+@media (max-width: 768px) {
+    .map-body {
+        flex-direction: column;
+        max-height: none;
+    }
+    .map-sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--space-border, #1e293b);
+        max-height: 200px;
+    }
+}
+
+/* Grid lines */
+.map-grid line {
+    stroke: var(--map-grid-line);
+    stroke-width: 0.5;
+}
+
+.map-grid text {
+    fill: var(--map-grid-label);
+    font-size: 0.6em;
+}
+
+/* Orbital connection lines */
+.orbital-line {
+    stroke: var(--map-orbital-line);
+    stroke-width: 0.5;
+}
+
+/* Transit lines */
+.transit-line {
+    stroke: var(--map-transit-line);
+    stroke-width: 1;
+    stroke-dasharray: 4 3;
+}
+
+/* Waypoint shapes — common */
+.wp-group {
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+.wp-group:hover {
+    filter: brightness(var(--map-hover-brightness));
+}
+
+.wp-group:hover .wp-shape {
+    transform-origin: center;
+    transform: scale(var(--map-hover-scale));
+    transition: transform 0.15s ease;
+}
+
+.wp-shape {
+    transition: transform 0.15s ease;
+}
+
+/* Per-type fills and strokes */
+.wp-type-planet .wp-shape {
+    fill: var(--map-planet-fill);
+    stroke: var(--map-planet-stroke);
+    stroke-width: 1.2;
+    filter: drop-shadow(var(--map-glow-planet));
+}
+
+.wp-type-gas-giant .wp-shape {
+    fill: var(--map-gas-giant-fill);
+    stroke: var(--map-gas-giant-stroke);
+    stroke-width: 1.2;
+    filter: drop-shadow(var(--map-glow-gas-giant));
+}
+
+.wp-type-moon .wp-shape {
+    fill: var(--map-moon-fill);
+    stroke: var(--map-moon-stroke);
+    stroke-width: 0.8;
+}
+
+.wp-type-asteroid .wp-shape {
+    fill: var(--map-asteroid-fill);
+    stroke: var(--map-asteroid-stroke);
+    stroke-width: 0.8;
+}
+
+.wp-type-station .wp-shape {
+    fill: var(--map-station-fill);
+    stroke: var(--map-station-stroke);
+    stroke-width: 1;
+    filter: drop-shadow(var(--map-glow-station));
+}
+
+.wp-type-jump-gate .wp-shape {
+    fill: var(--map-jump-gate-fill);
+    stroke: var(--map-jump-gate-stroke);
+    stroke-width: 1.2;
+    filter: drop-shadow(var(--map-glow-jump-gate));
+}
+
+.wp-type-nebula .wp-shape {
+    fill: var(--map-nebula-fill);
+    stroke: var(--map-nebula-stroke);
+    stroke-width: 0.8;
+    stroke-dasharray: 3 2;
+}
+
+.wp-type-gravity .wp-shape {
+    fill: var(--map-gravity-fill);
+    stroke: var(--map-gravity-stroke);
+    stroke-width: 0.6;
+}
+
+.wp-type-debris .wp-shape {
+    fill: var(--map-debris-fill);
+    stroke: var(--map-debris-stroke);
+    stroke-width: 0.8;
+    stroke-dasharray: 2 2;
+}
+
+.wp-type-fuel-station .wp-shape {
+    fill: var(--map-fuel-station-fill);
+    stroke: var(--map-fuel-station-stroke);
+    stroke-width: 1;
+}
+
+.wp-type-default .wp-shape {
+    fill: var(--map-default-fill);
+    stroke: var(--map-default-stroke);
+    stroke-width: 0.8;
+}
+
+/* Labels */
+.wp-label {
+    fill: var(--map-label-color);
+    font-family: monospace;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+/* Trait indicator dots */
+.trait-dot-market {
+    fill: var(--map-market-dot);
+}
+
+.trait-dot-shipyard {
+    fill: var(--map-shipyard-dot);
+}
+
+/* Ship-at-waypoint highlight ring */
+.wp-ship-ring {
+    fill: var(--map-ship-ring);
+    stroke: var(--map-ship-ring-stroke);
+    stroke-width: 0.8;
+    pointer-events: none;
+}
+
+/* Destination highlight ring (pulsing) */
+.wp-dest-ring {
+    fill: var(--map-dest-ring);
+    stroke: var(--map-dest-ring-stroke);
+    stroke-width: 0.8;
+    stroke-dasharray: var(--map-dest-dash);
+    pointer-events: none;
+    animation: dest-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dest-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* HQ — double green ring, always visible */
+.wp-hq-ring {
+    fill: var(--map-hq-ring);
+    stroke: var(--map-hq-ring-stroke);
+    stroke-width: 1.5;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.wp-hq-ring-inner {
+    fill: none;
+    stroke: var(--map-hq-inner-stroke);
+    stroke-width: 0.8;
+    stroke-dasharray: 2 2;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Delivery point — purple pulsing ring */
+.wp-delivery-ring {
+    fill: var(--map-delivery-ring);
+    stroke: var(--map-delivery-ring-stroke);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 3;
+    opacity: 0.6;
+    pointer-events: none;
+    animation: delivery-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes delivery-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Highlighted labels */
+.wp-is-hq .wp-label {
+    fill: var(--map-hq-ring-stroke, #10b981);
+    font-weight: bold;
+}
+
+.wp-is-delivery .wp-label {
+    fill: var(--map-delivery-ring-stroke, #a855f7);
+    font-weight: bold;
+}
+
+.wp-has-ship .wp-label {
+    fill: var(--map-ship-stroke, #f59e0b);
+    font-weight: bold;
+}
+
+.wp-is-destination .wp-label {
+    fill: var(--map-dest-ring-stroke, #22d3ee);
+}
+
+/* Ships */
+.ship-shape {
+    fill: var(--map-ship-fill);
+    stroke: var(--map-ship-stroke);
+    stroke-width: 0.8;
+}
+
+.ship-transit .ship-shape {
+    fill: var(--map-ship-transit-fill);
+    stroke-dasharray: 2 1;
+}
+
+.ship-label {
+    fill: var(--map-ship-fill);
+    font-family: monospace;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+/* Legend */
+.map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+.map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.map-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}

@@ -1,0 +1,30 @@
+{% if ship.cargo.inventory %}
+<table>
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Symbol</th>
+            <th class="text-right">Units</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in ship.cargo.inventory %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td class="text-muted">{{ item.symbol }}</td>
+            <td class="text-right">{{ item.units }}</td>
+            <td>
+                <form style="display: inline;" hx-post="/fleet/{{ ship.symbol }}/jettison" hx-target="#cargo-panel" hx-swap="innerHTML">
+                    <input type="hidden" name="symbol" value="{{ item.symbol }}">
+                    <input type="number" name="units" value="{{ item.units }}" min="1" max="{{ item.units }}" style="width: 5rem; display: inline; margin: 0; padding: 0.2rem 0.4rem; font-size: 0.8rem;">
+                    <button type="submit" class="btn-sm outline secondary" style="margin: 0;">Jettison</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">Cargo hold is empty.</p>
+{% endif %}

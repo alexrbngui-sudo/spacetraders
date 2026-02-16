@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — SpaceTraders{% endblock %}
+
+{% block agent_header %}
+{% include "components/agent_header.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="card-grid">
+    <!-- Fleet overview -->
+    <article>
+        <header>
+            <h3>Fleet ({{ ships|length }} ships)</h3>
+        </header>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ship</th>
+                    <th>Role</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ship in ships %}
+                <tr>
+                    <td><a href="/fleet/{{ ship.symbol }}">{{ ship.symbol }}</a></td>
+                    <td class="text-muted">{{ ship.registration.role }}</td>
+                    <td>{{ ship.nav.waypoint_symbol }}</td>
+                    <td><span class="badge badge-{{ ship.nav.status.value|lower|replace('_', '-') }}">{{ ship.nav.status.value|replace('_', ' ') }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/fleet">View all ships &rarr;</a>
+    </article>
+
+    <!-- Contracts overview -->
+    <article>
+        <header>
+            <h3>Contracts ({{ contracts|length }})</h3>
+        </header>
+        {% if contracts %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Faction</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contract in contracts %}
+                <tr>
+                    <td><a href="/contracts/{{ contract.id }}">{{ contract.type.value }}</a></td>
+                    <td class="text-muted">{{ contract.faction_symbol }}</td>
+                    <td>
+                        {% if contract.fulfilled %}
+                        <span class="badge badge-fulfilled">Fulfilled</span>
+                        {% elif contract.accepted %}
+                        <span class="badge badge-accepted">Accepted</span>
+                        {% else %}
+                        <span class="badge badge-pending">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-gold">{{ "{:,}".format(contract.terms.payment.on_fulfilled) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No active contracts.</p>
+        {% endif %}
+    </article>
+</div>
+
+<!-- Quick links -->
+<article>
+    <header>
+        <h3>Quick Navigation</h3>
+    </header>
+    <div class="actions">
+        <a href="/system" role="button" class="outline btn-sm">System Map</a>
+        {% for ship in ships %}
+        <a href="/fleet/{{ ship.symbol }}" role="button" class="outline secondary btn-sm">{{ ship.symbol }}</a>
+        {% endfor %}
+    </div>
+</article>
+{% endblock %}

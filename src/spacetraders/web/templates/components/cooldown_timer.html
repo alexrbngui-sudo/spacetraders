@@ -1,0 +1,7 @@
+<div class="cooldown" data-cooldown-seconds="{{ remaining }}" data-cooldown-total="{{ total }}" data-ship="{{ ship_symbol }}">
+    <span>Cooldown:</span>
+    <div class="cooldown-bar">
+        <div class="cooldown-fill" style="width: {{ (remaining / total * 100) if total > 0 else 0 }}%"></div>
+    </div>
+    <span class="cooldown-text">{{ remaining }}s</span>
+</div>

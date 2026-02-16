@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ship.symbol }} — SpaceTraders{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>{{ ship.symbol }}</h2>
+    <span class="text-muted">{{ ship.frame.name }} &middot; {{ ship.registration.role }}</span>
+</div>
+
+<div class="ship-detail-grid">
+    <!-- Left: Status + Actions -->
+    <article>
+        <header><h3>Status &amp; Actions</h3></header>
+        <div id="ship-status-panel">
+            {% include "components/ship_status.html" %}
+        </div>
+    </article>
+
+    <!-- Right: Cargo -->
+    <article>
+        <header>
+            <h3>Cargo ({{ ship.cargo.units }} / {{ ship.cargo.capacity }})</h3>
+        </header>
+        <div id="cargo-panel">
+            {% include "components/cargo_table.html" %}
+        </div>
+    </article>
+</div>
+
+<!-- Ship info -->
+<div class="card-grid mt-2">
+    <article>
+        <header><h3>Navigation</h3></header>
+        <table>
+            <tr><td class="text-muted">System</td><td><a href="/system/{{ ship.nav.system_symbol }}">{{ ship.nav.system_symbol }}</a></td></tr>
+            <tr><td class="text-muted">Waypoint</td><td>{{ ship.nav.waypoint_symbol }}</td></tr>
+            <tr><td class="text-muted">Flight Mode</td><td>{{ ship.nav.flight_mode.value }}</td></tr>
+            <tr>
+                <td class="text-muted">Destination</td>
+                <td>{{ ship.nav.route.destination.symbol }} ({{ ship.nav.route.destination.type }})</td>
+            </tr>
+        </table>
+        {% set has_market = true %}
+        <div class="actions mt-1">
+            <a href="/market/{{ ship.nav.system_symbol }}/{{ ship.nav.waypoint_symbol }}" role="button" class="outline btn-sm">View Market</a>
+        </div>
+    </article>
+
+    <article>
+        <header><h3>Equipment</h3></header>
+        <table>
+            <tr><td class="text-muted">Engine</td><td>{{ ship.engine.name }} (speed {{ ship.engine.speed }})</td></tr>
+            <tr><td class="text-muted">Reactor</td><td>{{ ship.reactor.name }} ({{ ship.reactor.power_output }} power)</td></tr>
+            <tr><td class="text-muted">Crew</td><td>{{ ship.crew.current }} / {{ ship.crew.capacity }}</td></tr>
+        </table>
+        {% if ship.mounts %}
+        <p class="text-muted mt-1" style="font-size: 0.8rem; margin-bottom: 0.25rem;">Mounts:</p>
+        <ul style="font-size: 0.8rem; margin: 0; padding-left: 1.25rem;">
+            {% for mount in ship.mounts %}
+            <li>{{ mount.name }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% if ship.modules %}
+        <p class="text-muted mt-1" style="font-size: 0.8rem; margin-bottom: 0.25rem;">Modules:</p>
+        <ul style="font-size: 0.8rem; margin: 0; padding-left: 1.25rem;">
+            {% for mod in ship.modules %}
+            <li>{{ mod.name }}{% if mod.capacity %} ({{ mod.capacity }}){% endif %}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </article>
+</div>
+{% endblock %}

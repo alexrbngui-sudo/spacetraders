@@ -1,0 +1,64 @@
+<div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+            <span class="badge badge-{{ ship.nav.status.value|lower|replace('_', '-') }}">{{ ship.nav.status.value|replace('_', ' ') }}</span>
+            <span class="text-muted" style="margin-left: 0.5rem;">{{ ship.nav.flight_mode.value }}</span>
+        </div>
+        <span class="text-muted">{{ ship.nav.waypoint_symbol }}</span>
+    </div>
+
+    <!-- Fuel gauge -->
+    <div class="gauge mb-1">
+        <span style="min-width: 3rem;">Fuel</span>
+        <div class="gauge-bar">
+            {% set fuel_pct = (ship.fuel.current / ship.fuel.capacity * 100) if ship.fuel.capacity > 0 else 100 %}
+            <div class="gauge-fill fuel" style="width: {{ fuel_pct }}%"></div>
+        </div>
+        <span class="gauge-text">{{ ship.fuel.current }} / {{ ship.fuel.capacity }}</span>
+    </div>
+
+    <!-- Cargo gauge -->
+    <div class="gauge mb-2">
+        <span style="min-width: 3rem;">Cargo</span>
+        <div class="gauge-bar">
+            {% set cargo_pct = (ship.cargo.units / ship.cargo.capacity * 100) if ship.cargo.capacity > 0 else 0 %}
+            <div class="gauge-fill cargo" style="width: {{ cargo_pct }}%"></div>
+        </div>
+        <span class="gauge-text">{{ ship.cargo.units }} / {{ ship.cargo.capacity }}</span>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="actions">
+        {% if ship.nav.status.value == "DOCKED" %}
+        <button class="btn-sm" hx-post="/fleet/{{ ship.symbol }}/orbit" hx-target="#ship-status-panel" hx-swap="innerHTML">
+            Orbit <span class="htmx-indicator spinner"></span>
+        </button>
+        <button class="btn-sm" hx-post="/fleet/{{ ship.symbol }}/refuel" hx-target="#ship-status-panel" hx-swap="innerHTML">
+            Refuel <span class="htmx-indicator spinner"></span>
+        </button>
+        {% elif ship.nav.status.value == "IN_ORBIT" %}
+        <button class="btn-sm" hx-post="/fleet/{{ ship.symbol }}/dock" hx-target="#ship-status-panel" hx-swap="innerHTML">
+            Dock <span class="htmx-indicator spinner"></span>
+        </button>
+        <button class="btn-sm" hx-post="/fleet/{{ ship.symbol }}/extract" hx-target="#ship-status-panel" hx-swap="innerHTML">
+            Extract <span class="htmx-indicator spinner"></span>
+        </button>
+        <button class="btn-sm" hx-post="/fleet/{{ ship.symbol }}/survey" hx-target="#ship-status-panel" hx-swap="innerHTML">
+            Survey <span class="htmx-indicator spinner"></span>
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Navigate form -->
+    {% if ship.nav.status.value == "IN_ORBIT" %}
+    <form class="nav-form mt-2" hx-post="/fleet/{{ ship.symbol }}/navigate" hx-target="#ship-status-panel" hx-swap="innerHTML">
+        <input type="text" name="waypoint" placeholder="Waypoint symbol" required style="flex: 1;">
+        <button type="submit" class="btn-sm">
+            Navigate <span class="htmx-indicator spinner"></span>
+        </button>
+    </form>
+    {% endif %}
+
+    <!-- Cooldown display slot -->
+    <div id="cooldown-slot" class="mt-1"></div>
+</div>
